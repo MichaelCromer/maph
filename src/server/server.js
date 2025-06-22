@@ -8,24 +8,30 @@ const PORT = 3001;
 app.use(cors());
 app.use(express.json());
 
+
 app.get('/api/nodes', (req, res) => {
     const nodes = db.prepare('SELECT * FROM nodes').all();
+    console.log(`Server recieved GET request /nodes`);
     res.json(nodes);
     console.log(nodes);
 });
 
+
 app.get('/api/edges', (req, res) => {
     const edges = db.prepare('SELECT * FROM edges').all();
+    console.log(`Server recieved GET request /edges`);
     res.json(edges);
     console.log(edges);
 });
 
 
-app.get('api/search', (req, res) => {
-    const { q } = req.query
+app.get('/api/search', (req, res) => {
+    const s = req.query.string
+    console.log(`Server recieved GET request /search?string=${s}`);
+
     const results = db.prepare(`
-        SELECT * FROM nodes WHERE title LIKE '%' || ? || '%' OR body LIKE '%' || ? || '%'
-    `).all(q, q);
+        SELECT * FROM nodes WHERE title LIKE ('%' || ? || '%')
+    `).all(s);
 
     res.json(results);
 });
