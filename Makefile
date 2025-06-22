@@ -2,6 +2,6 @@ tags:
 	ctags -R index.html src
 .PHONY: tags
 
-server:
-	rm src/server/database
-.PHONY: server
+clean:
+	rm -f tmp/database
+.PHONY: clean

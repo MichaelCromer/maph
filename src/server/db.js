@@ -2,7 +2,7 @@ const Database = require('better-sqlite3');
 const fs = require('fs');
 const path = require('path');
 
-const db = new Database('src/server/database');
+const db = new Database('src/tmp/database');
 
 db.prepare(`
     CREATE TABLE IF NOT EXISTS nodes (
