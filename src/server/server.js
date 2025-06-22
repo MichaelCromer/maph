@@ -14,6 +14,17 @@ app.get('/api/nodes', (req, res) => {
     console.log(nodes);
 });
 
+
+app.get('api/search', (req, res) => {
+    const { q } = req.query
+    const results = db.prepare(`
+        SELECT * FROM nodes WHERE title LIKE '%' || ? || '%' OR body LIKE '%' || ? || '%'
+    `).all(q, q);
+
+    res.json(results);
+});
+
+
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
