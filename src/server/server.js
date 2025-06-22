@@ -8,10 +8,10 @@ const PORT = 3001;
 app.use(cors());
 app.use(express.json());
 
-app.get('/api/data', (req, res) => {
-    const data = db.prepare('SELECT * FROM data').all();
-    res.json(data);
-    console.log(data);
+app.get('/api/nodes', (req, res) => {
+    const nodes = db.prepare('SELECT * FROM nodes').all();
+    res.json(nodes);
+    console.log(nodes);
 });
 
 app.listen(PORT, () => {

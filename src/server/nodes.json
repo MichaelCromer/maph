@@ -1,12 +1,14 @@
 [
     {
         "id": 1,
+        "type": 0,
         "title": "test title 1",
         "body": "test body 1"
     },
     {
         "id": 2,
+        "type": 1,
         "title": "test title 2",
-        "body": "test body 2"
+        "body": "test body 2 relies on definition ${1}"
     }
 ]

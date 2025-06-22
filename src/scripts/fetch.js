@@ -1,12 +1,13 @@
-const API_URL = "http://localhost:3001/api/data";
+const API_URL = "http://localhost:3001/api";
 
-async function fetch_data() {
-    const res = await fetch(API_URL);
-    const data = await res.json();
+async function fetch_nodes() {
+    const endpoint = API_URL.concat("/nodes");
+    const res = await fetch(endpoint);
+    const nodes = await res.json();
     const section = document.getElementById('user-history');
 
     section.innerHTML = '';
-    data.forEach(item => {
+    nodes.forEach(item => {
         const fieldset = document.createElement('fieldset'); 
         const legend = document.createElement('legend');
         const content = document.createElement('p');
@@ -24,4 +25,4 @@ async function fetch_data() {
     });
 }
 
-fetch_data();
+fetch_nodes();
