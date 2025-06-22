@@ -14,6 +14,12 @@ app.get('/api/nodes', (req, res) => {
     console.log(nodes);
 });
 
+app.get('/api/edges', (req, res) => {
+    const edges = db.prepare('SELECT * FROM edges').all();
+    res.json(edges);
+    console.log(edges);
+});
+
 
 app.get('api/search', (req, res) => {
     const { q } = req.query

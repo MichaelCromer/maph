@@ -2,7 +2,7 @@ const Database = require('better-sqlite3');
 const fs = require('fs');
 const path = require('path');
 
-const db = new Database('src/tmp/database');
+const db = new Database('tmp/database');
 
 db.prepare(`
     CREATE TABLE IF NOT EXISTS nodes (
@@ -24,7 +24,7 @@ db.prepare(`
         PRIMARY KEY (target, number),
         UNIQUE (source, target)
    )
-`);
+`).run();
 
 
 const db_nodes_insert = db.prepare(`
@@ -46,7 +46,7 @@ for (const item of nodes_json) {
 const edges_file = path.join(__dirname, 'edges.json');
 const edges_json = JSON.parse(fs.readFileSync(edges_file, 'utf-8'));
 for (const item of edges_json) {
-    db_edges_insert.run(item.source, item.taget, item.number);
+    db_edges_insert.run(item.source, item.target, item.number);
 }
 
 
