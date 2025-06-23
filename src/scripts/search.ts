@@ -1,6 +1,6 @@
 const API_URL = "http://localhost:3001/api";
 
-async function nodes_search(s) {
+async function nodes_search(s: string) {
     const endpoint = API_URL.concat(`/search?string=${s}`);
 
     const res = await fetch(endpoint);
@@ -42,7 +42,7 @@ function refresh_search_results(nodes) {
 
 const user_search = document.getElementById('user-search');
 
-user_search.addEventListener('change', async (e) => {
-    const nodes = await nodes_search(e.target.value);
+user_search.addEventListener('change', async (e: Event) => {
+    const nodes = await nodes_search((e.target as HTMLTextAreaElement).value);
     refresh_search_results(nodes);
 });

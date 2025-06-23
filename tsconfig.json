@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+        "outDir": "./bld",
+        "allowJs": false,
+        "esModuleInterop": true,
+        "lib": [ "dom", "es2015" ]
+    },
+    "include": [ "./src/**/*" ]
+}
