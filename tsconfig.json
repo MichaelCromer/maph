@@ -4,6 +4,8 @@
         "allowJs": false,
         "esModuleInterop": true,
         "noImplicitAny": true,
+        "strictNullChecks": true,
+        "noEmitOnError": true,
         "removeComments": true,
         "lib": [ "dom", "es2018" ],
         "target": "es6",
