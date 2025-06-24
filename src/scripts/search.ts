@@ -1,7 +1,9 @@
+import { Node } from './graph'
+
 const API_URL = "http://localhost:3001/api";
 
-async function nodes_search(s: string) {
-    const endpoint = API_URL.concat(`/search?string=${s}`);
+async function nodes_search(str : string) : Promise<Node[]> {
+    const endpoint = API_URL.concat(`/search?string=${str}`);
 
     const res = await fetch(endpoint);
     const nodes = await res.json();
@@ -9,7 +11,7 @@ async function nodes_search(s: string) {
     return nodes;
 }
 
-function refresh_search_results(nodes) {
+function refresh_search_results(nodes : Node[]) : void {
     const list = document.getElementById('user-search-results');
 
     list.innerHTML = '';
@@ -23,7 +25,7 @@ function refresh_search_results(nodes) {
 
     console.log(nodes);
 
-    nodes.forEach(item => {
+    nodes.forEach((item : Node) => {
         const list_item = document.createElement('li')
         const title = document.createElement('h6');
         const body = document.createElement('p');
@@ -42,7 +44,7 @@ function refresh_search_results(nodes) {
 
 const user_search = document.getElementById('user-search');
 
-user_search.addEventListener('change', async (e: Event) => {
+user_search.addEventListener('change', async (e: Event) : Promise<void> => {
     const nodes = await nodes_search((e.target as HTMLTextAreaElement).value);
     refresh_search_results(nodes);
 });

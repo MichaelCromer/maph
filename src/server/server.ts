@@ -1,5 +1,6 @@
-import express = require('express');
-import cors = require('cors');
+import express from 'express';
+import { Response, Request } from 'express';
+import cors from 'cors';
 import Database from 'better-sqlite3';
 
 const db = new Database('bld/database');
@@ -10,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 
 
-app.get('/api/nodes', (req, res) => {
+app.get('/api/nodes', (req : Request, res : Response) => {
     const nodes = db.prepare('SELECT * FROM nodes').all();
     console.log(`Server recieved GET request /nodes`);
     res.json(nodes);
@@ -18,15 +19,15 @@ app.get('/api/nodes', (req, res) => {
 });
 
 
-app.get('/api/edges', (req, res) => {
+app.get('/api/edges', (req : Request, res : Response) => {
     const edges = db.prepare('SELECT * FROM edges').all();
     console.log(`Server recieved GET request /edges`);
-    res.json(edges);
     console.log(edges);
+    res.json(edges);
 });
 
 
-app.get('/api/search', (req, res) => {
+app.get('/api/search', (req : Request, res : Response) => {
     const s = req.query.string
     console.log(`Server recieved GET request /search?string=${s}`);
 
