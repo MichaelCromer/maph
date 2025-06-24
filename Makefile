@@ -7,5 +7,5 @@ tags:
 .PHONY: tags
 
 clean:
-	rm -f bld/database
+	rm -rf bld/*
 .PHONY: clean
