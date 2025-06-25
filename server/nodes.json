@@ -10,5 +10,11 @@
         "type": 1,
         "title": "test title 2",
         "body": "test body 2 relies on definition ${1}"
+    },
+    {
+        "id": 3,
+        "type": 0,
+        "title": "test title 3",
+        "body": "test body 3 is important in test title 2"
     }
 ]

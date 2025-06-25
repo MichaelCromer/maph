@@ -1,7 +1,7 @@
-import { readFileSync } from 'fs';
-import Database from 'better-sqlite3';
+const fs = require('fs');
+const Database = require('better-sqlite3');
 
-const db = new Database('bld/database');
+const db = new Database('./server/database');
 
 db.prepare(`
     CREATE TABLE IF NOT EXISTS nodes (
@@ -35,14 +35,14 @@ const db_edges_insert = db.prepare(`
 `);
 
 
-const nodes_file = "./src/server/nodes.json";
-const nodes_json = JSON.parse(readFileSync(nodes_file, 'utf-8'));
+const nodes_file = "./server/nodes.json";
+const nodes_json = JSON.parse(fs.readFileSync(nodes_file, 'utf-8'));
 for (const item of nodes_json) {
     db_nodes_insert.run(item.id, item.type, item.title, item.body);
 }
 
-const edges_file = "./src/server/edges.json";
-const edges_json = JSON.parse(readFileSync(edges_file, 'utf-8'));
+const edges_file = "./server/edges.json";
+const edges_json = JSON.parse(fs.readFileSync(edges_file, 'utf-8'));
 for (const item of edges_json) {
     db_edges_insert.run(item.source, item.target, item.number);
 }
