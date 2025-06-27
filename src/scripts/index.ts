@@ -201,10 +201,10 @@ async function event_user_search(e: Event): Promise<void>
     const json_data = await search_vertices(search_term);
     const search_graph = graph_parse(json_data);
 
-    console.log(user_graph);
-    console.log(search_graph);
+    console.log(`User graph was ${user_graph}`);
+    console.log(`Search results are ${search_graph}`);
     user_graph.union_hard(search_graph);
-    console.log(user_graph);
+    console.log(`User graph is now ${user_graph}`);
 
     //search_results_refresh(search_graph);
 
