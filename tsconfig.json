@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "outDir": "./bld",
+        "outDir": "./bld/scripts",
         "allowJs": false,
         "esModuleInterop": true,
         "noImplicitAny": true,
