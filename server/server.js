@@ -32,7 +32,7 @@ app.get('/api/search', (req, res) => {
     console.log(`Server recieved GET request /search?string=${str_search}`);
 
     const json_vertices = db.prepare(`
-        SELECT id, type, title, body FROM json_vertices WHERE title LIKE ('%' || ? || '%')
+        SELECT id, type, title, body FROM vertices WHERE title LIKE ('%' || ? || '%')
     `).all(str_search);
 
     if (json_vertices.length === 0) { return res.json([]); }
@@ -40,7 +40,7 @@ app.get('/api/search', (req, res) => {
     const vertex_ids = json_vertices.map((v) => v.id);
     const placeholders = vertex_ids.map(() => '?').join(',');
     const json_edges = db.prepare(`
-        SELECT source, target, number FROM json_edges WHERE source IN (${placeholders})
+        SELECT source, target, number FROM edges WHERE source IN (${placeholders})
     `).all(...vertex_ids)
 
     const results = json_vertices.map((v) => ({
