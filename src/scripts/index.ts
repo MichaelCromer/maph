@@ -23,16 +23,13 @@ function JSON_parse<Type>(data: JSON_Object, key: string, fallback: Type): Type
 }
 
 
-
-
 /*--------------------------------------------------------------------------------------
  *  SUBSECTION VERTEX
  */
 
 
 type VertexID = number;
-type Vertex =
-{
+type Vertex = {
     type : VertexID,
     title : string,
     body : string,
@@ -40,17 +37,15 @@ type Vertex =
 };
 
 
-function vertex_parse(data: JSON_Object): Vertex
+function vertex_parse(json_vertex: JSON_Object): Vertex
 {
     return {
-        type : JSON_parse<number>(data, "type", -1),
-        title : JSON_parse<string>(data, "title", "Vertex Title Not Found"),
-        body : JSON_parse<string>(data, "body", "Vertex body not found"),
-        edges : JSON_parse<number[]>(data, "edges", []),
+        type : JSON_parse<number>(json_vertex, "type", -1),
+        title : JSON_parse<string>(json_vertex, "title", "Vertex Title Not Found"),
+        body : JSON_parse<string>(json_vertex, "body", "Vertex body not found"),
+        edges : JSON_parse<number[]>(json_vertex, "edges", []),
     };
 }
-
-
 
 
 /*--------------------------------------------------------------------------------------
@@ -70,6 +65,16 @@ class Graph
         this.vertices[id] = vertex;
     }
 
+    vertex_get(id: VertexID): Vertex | undefined {
+        return this.vertices[id];
+    }
+
+    vertices_get(ids: VertexID[]): Vertex[] {
+        return ids
+            .map((id) => this.vertices[id])
+            .filter((x) => typeof x !== "undefined");
+    }
+
     union_soft(g: Graph): void {
         this.vertices = { ...g.vertices, ...this.vertices };
     }
@@ -77,26 +82,24 @@ class Graph
     union_hard(g: Graph): void {
         this.vertices = { ...this.vertices, ...g.vertices };
     }
-
-    vertex(id: VertexID): Vertex | undefined {
-        return this.vertices[id];
-    }
 }
 
 
-function graph_parse(data_vertices: JSON_Object[]) : Graph 
+function graph_parse(json_vertices: JSON_Object[]) : Graph 
 {
     const graph = new Graph();
 
-    for (const data_vertex of data_vertices) {
-        const id = JSON_parse<number>(data_vertex, "id", -1);
+    for (const json_vertex of json_vertices) {
+        const id = JSON_parse<number>(json_vertex, "id", -1);
         if (id === -1) { continue; }
-        const vertex = vertex_parse(data_vertex);
+        const vertex = vertex_parse(json_vertex);
         graph.vertex_append(id, vertex);
     }
 
     return graph;
 }
+
+
 
 
 /*======================================================================================
@@ -115,16 +118,13 @@ function graph_parse(data_vertices: JSON_Object[]) : Graph
 const API_URL = "http://localhost:3001/api";
 
 
-
-
 /*--------------------------------------------------------------------------------------
  *  SUBSECTION PAGE DATA
  */
 
 
 const html_user_search = document.getElementById('user-search');
-
-
+const html_user_search_results = document.getElementById('user-search-results');
 
 
 /*--------------------------------------------------------------------------------------
@@ -132,8 +132,10 @@ const html_user_search = document.getElementById('user-search');
  */
 
 
-const user_graph : Graph = new Graph();
-const user_search : VertexID[] = [];
+const user_graph: Graph = new Graph();
+const user_search: VertexID[] = [];
+const user_history: VertexID[] = [];
+const user_current: VertexID = -1;
 
 
 
@@ -155,19 +157,17 @@ async function search_vertices(str: string): Promise<JSON_Object[]> {
     return data;
 }
 
-function search_results_refresh(vertices: Vertex[]): void {
-    const list = document.getElementById('user-search-results');
+function search_results_refresh(vertex_ids: VertexID[]): void {
+    html_user_search_results!.innerHTML = '';
 
-    list!.innerHTML = '';
-
-    if (vertices.length == 0) {
+    if (vertex_ids.length == 0) {
         const message_empty = document.createElement('p');
         message_empty.textContent = "No results found";
-        list!.appendChild(message_empty);
+        html_user_search_results!.appendChild(message_empty);
         return;
     }
 
-    console.log(vertices);
+    const vertices: Vertex[] = user_graph.vertices_get(vertex_ids);
 
     vertices.forEach((item: Vertex) => {
         const list_item = document.createElement('li')
@@ -182,10 +182,9 @@ function search_results_refresh(vertices: Vertex[]): void {
 
         body.toggleAttribute('hidden');
 
-        list!.appendChild(list_item);
+        html_user_search_results!.appendChild(list_item);
     });
 }
-
 
 
 /*--------------------------------------------------------------------------------------
@@ -201,12 +200,8 @@ async function event_user_search(e: Event): Promise<void>
     const json_data = await search_vertices(search_term);
     const search_graph = graph_parse(json_data);
 
-    console.log(`User graph was ${user_graph}`);
-    console.log(`Search results are ${search_graph}`);
     user_graph.union_hard(search_graph);
-    console.log(`User graph is now ${user_graph}`);
-
-    //search_results_refresh(search_graph);
+    search_results_refresh(json_data.map(x => x.id));
 
     (e.target as HTMLTextAreaElement).blur();
 }
@@ -223,5 +218,3 @@ async function event_user_search(e: Event): Promise<void>
 
 
 html_user_search!.addEventListener('change', event_user_search);
-
-
