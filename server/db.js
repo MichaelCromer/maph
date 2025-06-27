@@ -4,7 +4,7 @@ const Database = require('better-sqlite3');
 const db = new Database('./server/database');
 
 db.prepare(`
-    CREATE TABLE IF NOT EXISTS nodes (
+    CREATE TABLE IF NOT EXISTS vertices (
         id INTEGER NOT NULL,
         type INTEGER NOT NULL,
         title TEXT NOT NULL,
@@ -16,8 +16,8 @@ db.prepare(`
 
 db.prepare(`
     CREATE TABLE IF NOT EXISTS edges (
-        source INTEGER REFERENCES nodes(id),
-        target INTEGER REFERENCES nodes(id),
+        source INTEGER REFERENCES vertices(id),
+        target INTEGER REFERENCES vertices(id),
         number INTEGER NOT NULL,
 
         PRIMARY KEY (target, number),
@@ -26,8 +26,8 @@ db.prepare(`
 `).run();
 
 
-const db_nodes_insert = db.prepare(`
-    INSERT OR IGNORE INTO nodes (id, type, title, body) VALUES (?, ?, ?, ?)
+const db_vertices_insert = db.prepare(`
+    INSERT OR IGNORE INTO vertices (id, type, title, body) VALUES (?, ?, ?, ?)
 `);
 
 const db_edges_insert = db.prepare(`
@@ -35,10 +35,10 @@ const db_edges_insert = db.prepare(`
 `);
 
 
-const nodes_file = "./server/nodes.json";
-const nodes_json = JSON.parse(fs.readFileSync(nodes_file, 'utf-8'));
-for (const item of nodes_json) {
-    db_nodes_insert.run(item.id, item.type, item.title, item.body);
+const vertices_file = "./server/vertices.json";
+const vertices_json = JSON.parse(fs.readFileSync(vertices_file, 'utf-8'));
+for (const item of vertices_json) {
+    db_vertices_insert.run(item.id, item.type, item.title, item.body);
 }
 
 const edges_file = "./server/edges.json";

@@ -10,11 +10,11 @@ app.use(cors());
 app.use(express.json());
 
 
-app.get('/api/nodes', (req, res) => {
-    const nodes = db.prepare('SELECT * FROM nodes').all();
-    console.log(`Server recieved GET request /nodes`);
-    res.json(nodes);
-    console.log(nodes);
+app.get('/api/vertices', (req, res) => {
+    const vertices = db.prepare('SELECT * FROM vertices').all();
+    console.log(`Server recieved GET request /vertices`);
+    res.json(vertices);
+    console.log(vertices);
 });
 
 
@@ -27,12 +27,29 @@ app.get('/api/edges', (req, res) => {
 
 
 app.get('/api/search', (req, res) => {
-    const s = req.query.string
-    console.log(`Server recieved GET request /search?string=${s}`);
+    // TODO man get some proper parsing upindisbish
+    const str_search = req.query.string?.toString().trim() ?? '';
+    console.log(`Server recieved GET request /search?string=${str_search}`);
 
-    const results = db.prepare(`
-        SELECT * FROM nodes WHERE title LIKE ('%' || ? || '%')
-    `).all(s);
+    const json_vertices = db.prepare(`
+        SELECT id, type, title, body FROM json_vertices WHERE title LIKE ('%' || ? || '%')
+    `).all(str_search);
+
+    if (json_vertices.length === 0) { return res.json([]); }
+
+    const vertex_ids = json_vertices.map((v) => v.id);
+    const placeholders = vertex_ids.map(() => '?').join(',');
+    const json_edges = db.prepare(`
+        SELECT source, target, number FROM json_edges WHERE source IN (${placeholders})
+    `).all(...vertex_ids)
+
+    const results = json_vertices.map((v) => ({
+        ...v,
+        edges: json_edges
+            .filter((e) => e.source === v.id)
+            .sort((x, y) => x.number - y.number)
+            .map((e) => e.target)
+    }));
 
     res.json(results);
 });
