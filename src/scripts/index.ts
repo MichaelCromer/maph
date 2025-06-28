@@ -1,55 +1,55 @@
 /*======================================================================================
- *  SECTION DATA TYPES
- *--------------------------------------------------------------------------------------
- *
- *
+ *  SEC DATA TYPES
+ *======================================================================================
  */
 
 
 /*--------------------------------------------------------------------------------------
- *  SUBSECTION JSON
+ *  SUB JSON
  */
 
 
 interface JSON_Object
 {
-    [key : string] : any
+    [key: string]: any
 }
 
 
 function JSON_parse<Type>(data: JSON_Object, key: string, fallback: Type): Type
 {
-    return (typeof data[key] === typeof fallback) ? data[key] : fallback;
+    return (typeof data[key] === typeof fallback) ? data[key]: fallback;
 }
 
 
 /*--------------------------------------------------------------------------------------
- *  SUBSECTION VERTEX
+ *  SUB VERTEX
  */
 
 
 type VertexID = number;
 type Vertex = {
-    type : VertexID,
-    title : string,
-    body : string,
-    edges : VertexID[],
+    id: VertexID
+    type: number,
+    title: string,
+    body: string,
+    edges: VertexID[],
 };
 
 
 function vertex_parse(json_vertex: JSON_Object): Vertex
 {
     return {
-        type : JSON_parse<number>(json_vertex, "type", -1),
-        title : JSON_parse<string>(json_vertex, "title", "Vertex Title Not Found"),
-        body : JSON_parse<string>(json_vertex, "body", "Vertex body not found"),
-        edges : JSON_parse<number[]>(json_vertex, "edges", []),
+        id: JSON_parse<number>(json_vertex, "id", -1),
+        type: JSON_parse<number>(json_vertex, "type", -1),
+        title: JSON_parse<string>(json_vertex, "title", "Vertex Title Not Found"),
+        body: JSON_parse<string>(json_vertex, "body", "Vertex body not found"),
+        edges: JSON_parse<number[]>(json_vertex, "edges", []),
     };
 }
 
 
 /*--------------------------------------------------------------------------------------
- *  SUBSECTION GRAPH
+ *  SUB GRAPH
  */
 
 
@@ -61,8 +61,8 @@ class Graph
         this.vertices = { ...vertices };
     }
 
-    vertex_append(id: number, vertex: Vertex): void {
-        this.vertices[id] = vertex;
+    vertex_append(vertex: Vertex): void {
+        this.vertices[vertex.id] = vertex;
     }
 
     vertex_get(id: VertexID): Vertex | undefined {
@@ -85,15 +85,14 @@ class Graph
 }
 
 
-function graph_parse(json_vertices: JSON_Object[]) : Graph 
+function graph_parse(json_vertices: JSON_Object[]): Graph 
 {
     const graph = new Graph();
 
     for (const json_vertex of json_vertices) {
-        const id = JSON_parse<number>(json_vertex, "id", -1);
-        if (id === -1) { continue; }
         const vertex = vertex_parse(json_vertex);
-        graph.vertex_append(id, vertex);
+        if (vertex.id === -1) { continue; }
+        graph.vertex_append(vertex);
     }
 
     return graph;
@@ -103,15 +102,13 @@ function graph_parse(json_vertices: JSON_Object[]) : Graph
 
 
 /*======================================================================================
- *  SECTION GLOBAL DATA
- *--------------------------------------------------------------------------------------
- *
- *
+ *  SEC GLOBAL DATA
+ *======================================================================================
  */
 
 
 /*--------------------------------------------------------------------------------------
- *  SUBSECTION PROGRAM DATA
+ *  SUB PROGRAM DATA
  */
 
 
@@ -119,16 +116,17 @@ const API_URL = "http://localhost:3001/api";
 
 
 /*--------------------------------------------------------------------------------------
- *  SUBSECTION PAGE DATA
+ *  SUB PAGE DATA
  */
 
 
 const html_user_search = document.getElementById('user-search');
 const html_user_search_results = document.getElementById('user-search-results');
+const html_user_history = document.getElementById('user-history');
 
 
 /*--------------------------------------------------------------------------------------
- *  SUBSECTION USER DATA
+ *  SUB USER DATA
  */
 
 
@@ -141,11 +139,27 @@ const user_current: VertexID = -1;
 
 
 /*======================================================================================
- *  SECTION FUNCTIONS
- *--------------------------------------------------------------------------------------
- *
- *
+ *  SEC FUNCTIONS
+ *======================================================================================
  */
+
+
+function vertex_card_create(vertex: Vertex): HTMLElement
+{
+    const card = document.createElement('fieldset');
+    const title = document.createElement('legend');
+    const body = document.createElement('p');
+
+    title.textContent = `${vertex.title}`;
+    body.textContent = `${vertex.body}`;
+
+    card.appendChild(title);
+    card.appendChild(body);
+    card.setAttribute('data-vertex-id', `${vertex.id}`);
+    card.setAttribute('class', 'vertex-card');
+
+    return card;
+}
 
 
 async function search_vertices(str: string): Promise<JSON_Object[]> {
@@ -157,38 +171,26 @@ async function search_vertices(str: string): Promise<JSON_Object[]> {
     return data;
 }
 
-function search_results_refresh(vertex_ids: VertexID[]): void {
+function search_results_refresh(vertices: Vertex[]): void {
     html_user_search_results!.innerHTML = '';
 
-    if (vertex_ids.length == 0) {
+    if (vertices.length == 0) {
         const message_empty = document.createElement('p');
         message_empty.textContent = "No results found";
         html_user_search_results!.appendChild(message_empty);
         return;
     }
 
-    const vertices: Vertex[] = user_graph.vertices_get(vertex_ids);
-
-    vertices.forEach((item: Vertex) => {
-        const list_item = document.createElement('li')
-        const title = document.createElement('h6');
-        const body = document.createElement('p');
-
-        title.textContent = `${item.title}`;
-        body.textContent = `${item.body}`;
-
-        list_item.appendChild(title);
-        list_item.appendChild(body);
-
-        body.toggleAttribute('hidden');
-
+    vertices.forEach((vertex: Vertex) => {
+        const list_item = document.createElement('li');
+        list_item.appendChild(vertex_card_create(vertex));
         html_user_search_results!.appendChild(list_item);
     });
 }
 
 
 /*--------------------------------------------------------------------------------------
- *  SUBSECTION EVENTS
+ *  SUB EVENTS
  */
 
 
@@ -201,7 +203,7 @@ async function event_user_search(e: Event): Promise<void>
     const search_graph = graph_parse(json_data);
 
     user_graph.union_hard(search_graph);
-    search_results_refresh(json_data.map(x => x.id));
+    search_results_refresh(Object.values(search_graph.vertices));
 
     (e.target as HTMLTextAreaElement).blur();
 }
@@ -210,10 +212,8 @@ async function event_user_search(e: Event): Promise<void>
 
 
 /*======================================================================================
- *  SECTION MAIN
- *--------------------------------------------------------------------------------------
- *
- *
+ *  SEC MAIN
+ *======================================================================================
  */
 
 
